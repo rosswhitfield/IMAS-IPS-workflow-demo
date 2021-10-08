@@ -9,7 +9,7 @@ This IPS has 3 components:
 
 It runs a time loop from 1 to 10.
 
-## Running in Docker
+## Building IMAS in Docker
 
 This assumes you have cloned the repos already, since they will just be copied in
 
@@ -24,7 +24,7 @@ To build docker image
 docker build . --tag imas
 ```
 
-To run IPS-IMAS demo in container
+### Running IPS-IMAS demo in Docker container
 
 ```
 docker run imas
@@ -50,4 +50,32 @@ Submit batch script
 
 ```
 sbatch batch-stellar-intel.sh
+```
+
+## Building IMAS on cori
+
+The script `imas_cori_build` will download, build and install IMAS to
+`$HOME/IMAS`. It only builds the python, gfortran and ifort APIs and
+only for the HDF5 backend.
+
+## Running on cori
+
+First install IPS
+
+```
+module load python
+python -m pip install ipsframework
+```
+
+Build IMAS Fortran component, can be either gfortran or ifort
+
+```
+cd IPS
+./build-cori.sh
+```
+
+Submit batch script
+
+```
+sbatch batch-cori.sh
 ```
