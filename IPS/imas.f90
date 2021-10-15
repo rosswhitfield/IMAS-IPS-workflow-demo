@@ -26,8 +26,15 @@ program imas
   write(*,*) "backend = ", imas_backend
   write(*,*) "timestamp = ", timestamp
 
-  call ual_begin_pulse_action(imas_backend, shot, run, user, tokamak, '3', idx)
-  call ual_open_pulse(idx, OPEN_PULSE, '', status)
+  call ual_begin_pulse_action(imas_backend, shot, run, user, tokamak, '3', idx, status)
+  if (status.eq.0) then
+     call ual_open_pulse(idx, OPEN_PULSE, '', status)
+  end if
+
+  if (status.ne.0) then
+     stop 1
+  end if
+
   write(*,*) 'Opened pulse file, idx = ', idx
 
   call ids_get_slice(idx, "core_profiles", cp, timestamp, CLOSEST_INTERP)
@@ -39,6 +46,13 @@ program imas
 
   call ids_put_slice(idx, "core_profiles", cp)
 
-  call ual_close_pulse(idx, OPEN_PULSE, '', status)
+  call ual_close_pulse(idx, CLOSE_PULSE, '', status)
+  if (status.eq.0) then
+     call ual_end_action(idx, status)
+  end if
+
+  if (status.ne.0) then
+     stop 1
+  end if
   write(*,*) "Program completed"
 end program imas
