@@ -1,0 +1,40 @@
+#!/bin/bash
+
+conda create -n imas python=3.9 hdf5 gcc gxx gfortran boost cython
+conda activate imas
+
+git clone ssh://git@git.iter.org/imas/data-dictionary.git
+git clone ssh://git@git.iter.org/imas/access-layer.git
+
+wget https://downloads.sourceforge.net/project/saxon/Saxon-HE/9.9/SaxonHE9-9-0-2J.zip
+unzip SaxonHE9-9-0-2J.zip -d saxon
+export CLASSPATH=$PWD/saxon/saxon9he.jar
+
+export IMAS_INSTALL_DIR=$CONDA_PREFIX
+
+cd data-dictionary
+make
+make install
+
+cd ../access-layer
+export HDF5_DIR=$CONDA_PREFIX
+ln -s ../data-dictionary xml
+sed -i "s/<hdf5_\(.*\).h>/\"hdf5_\1.h\"/" lowlevel/hdf5_backend_factory.h
+make IMAS_MDSPLUS=no IMAS_UDA=no IMAS_JAVA=no IMAS_MATLAB=no IMAS_MEX=no IMAS_CPP=no -j8
+make IMAS_MDSPLUS=no IMAS_UDA=no IMAS_JAVA=no IMAS_MATLAB=no IMAS_MEX=no IMAS_CPP=no install
+
+cd pythoninterface/imasloader
+python -m pip install .
+
+cd ../..
+
+# Add environment variables to conda env
+echo '#!/bin/bash' > $CONDA_PREFIX/etc/conda/activate.d/env_vars.sh
+echo "export IMAS_PREFIX=$CONDA_PREFIX" >> $CONDA_PREFIX/etc/conda/activate.d/env_vars.sh
+echo "export IMAS_VERSION=`cd xml; git describe`" >> $CONDA_PREFIX/etc/conda/activate.d/env_vars.sh
+echo "export LD_LIBRARY_PATH=$CONDA_PREFIX/lib" >> $CONDA_PREFIX/etc/conda/activate.d/env_vars.sh
+
+echo '#!/bin/bash' > $CONDA_PREFIX/etc/conda/deactivate.d/env_vars.sh
+echo "unset IMAS_PREFIX" >> $CONDA_PREFIX/etc/conda/deactivate.d/env_vars.sh
+echo "unset IMAS_VERSION" >> $CONDA_PREFIX/etc/conda/deactivate.d/env_vars.sh
+echo "unset LD_LIBRARY_PATH" >> $CONDA_PREFIX/etc/conda/deactivate.d/env_vars.sh
