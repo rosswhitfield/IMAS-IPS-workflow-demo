@@ -1,5 +1,6 @@
 #!/bin/bash
 
+conda config --add channels conda-forge
 conda create -n imas python=3.9 hdf5 gcc gxx gfortran boost cython
 conda activate imas
 
@@ -38,3 +39,25 @@ echo '#!/bin/bash' > $CONDA_PREFIX/etc/conda/deactivate.d/env_vars.sh
 echo "unset IMAS_PREFIX" >> $CONDA_PREFIX/etc/conda/deactivate.d/env_vars.sh
 echo "unset IMAS_VERSION" >> $CONDA_PREFIX/etc/conda/deactivate.d/env_vars.sh
 echo "unset LD_LIBRARY_PATH" >> $CONDA_PREFIX/etc/conda/deactivate.d/env_vars.sh
+
+cd ..
+
+# install omas
+conda install omas
+
+# install PyAl
+git clone ssh://git@git.iter.org/imas/pyal.git
+cd pyal
+python -m pip install .
+cd ..
+
+# install IMASPy
+cd data-dictionary
+zip IDSDef.zip IDSDef.xml
+cd ..
+git clone ssh://git@git.iter.org/imas/imaspy.git
+cd imaspy
+conda install --file requirements_core.txt
+mkdir data-dictionary
+cp ../data-dictionary/IDSDef.zip data-dictionary
+python -m pip install .

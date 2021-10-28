@@ -6,13 +6,13 @@ user = sys.argv[1]
 tokamak = sys.argv[2]
 shot = int(sys.argv[3])
 run = int(sys.argv[4])
-imas_baskend = int(sys.argv[5])
+imas_backend = int(sys.argv[5])
 
 print("Python IMAS display program")
 print(f'tokamak={tokamak} shot={shot} run={run}')
 
 imas_obj = imas.ids(shot, run)
-imas_obj.open_env_backend(user, tokamak, '3', imas_baskend)
+imas_obj.open_env_backend(user, tokamak, '3', imas_backend)
 
 if not imas_obj.isConnected():
     raise RuntimeError('open failed')
