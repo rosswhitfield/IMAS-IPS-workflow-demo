@@ -7,7 +7,7 @@ tokamak = sys.argv[2]
 shot = int(sys.argv[3])
 run = int(sys.argv[4])
 
-print("Python IMAS display program")
+print("Python OMAS display program")
 print(f'tokamak={tokamak} shot={shot} run={run}')
 
 # hack to change IMAS backend to HDF5

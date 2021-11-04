@@ -11,7 +11,7 @@ module load python
 module load gcc
 
 export IMAS_PREFIX=$HOME/IMAS
-export IMAS_VERSION=3.33.0
+export IMAS_VERSION=3.34.0
 export PYTHONPATH=$IMAS_PREFIX/python/lib
 export LD_LIBRARY_PATH=$IMAS_PREFIX/lib:$LD_LIBRARY_PATH
 export HDF5_USE_FILE_LOCKING=FALSE

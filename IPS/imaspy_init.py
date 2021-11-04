@@ -6,7 +6,7 @@ import shutil
 import os
 
 
-class imas_init(Component):
+class imaspy_init(Component):
     def init(self, timestamp=0.0, **keywords):
         self.cwd = self.services.get_working_dir()
         self.tokamak = self.services.get_config_param('TOKAMAK_ID')
@@ -15,7 +15,7 @@ class imas_init(Component):
         self.imas_backend = int(self.services.get_config_param('IMAS_BACKEND'))
 
     def step(self, timestamp=0.0, **keywords):
-        imas_version = os.get("IMAS_VERSION")
+        imas_version = os.getenv("IMAS_VERSION")
         xml_path = os.getenv("IMAS_PREFIX")+'/include/IDSDef.xml'
 
         ids = imaspy.ids_root.IDSRoot(self.shot, self.run,
