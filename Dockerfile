@@ -19,6 +19,7 @@ RUN apt-get install --yes     \
 	libhdf5-dev           \
 	libsaxonhe-java       \
 	openjdk-8-jre-headless\
+	openjdk-8-jdk-headless\
 	pkg-config            \
 	python3               \
 	python3-setuptools    \
@@ -26,20 +27,40 @@ RUN apt-get install --yes     \
 	python3-pip           \
 	python3-wheel         \
 	python-is-python3     \
-	xsltproc
+	xsltproc              \
+	automake              \
+	flex                  \
+	bison                 \
+	gperf                 \
+	libxml2-dev           \
+	libreadline-dev       \
+	libmotif-dev          \
+	rsync
+
 RUN apt-get clean all
+
+RUN git clone -b stable_release-7-84-8 --depth 1 https://github.com/MDSplus/mdsplus.git
+
+RUN cd mdsplus && \
+    ./bootstrap && \
+    mkdir build && \
+    cd build && \
+    ../configure --prefix=/usr && \
+    make && \
+    make install
+
+ENV MDSPLUS_DIR /usr
 
 COPY access-layer access-layer
 COPY data-dictionary data-dictionary
 
-ENV CLASSPATH /usr/share/java/Saxon-HE.jar
+ENV CLASSPATH /usr/share/java/Saxon-HE.jar:/usr/java/classes/jTraverser.jar
 ENV SAXONJARFILE Saxon-HE.jar
 ENV HDF5_DIR /usr/lib/x86_64-linux-gnu/hdf5/serial
 
 ENV IMAS_INSTALL_DIR /usr
-ENV IMAS_VERSION 3.33.0
+ENV IMAS_VERSION 3.34.0
 
-ENV IMAS_MDSPLUS no
 ENV IMAS_UDA no
 ENV IMAS_JAVA no
 ENV IMAS_MATLAB no
@@ -48,8 +69,6 @@ ENV IMAS_MEX no
 RUN cd data-dictionary && make install
 
 RUN ln -s /usr/include /code/access-layer/xml
-
-RUN sed -i "s/<hdf5_\(.*\).h>/\"hdf5_\1.h\"/" access-layer/lowlevel/hdf5_backend_factory.h
 
 RUN cd access-layer && make -j12
 RUN cd access-layer && make install

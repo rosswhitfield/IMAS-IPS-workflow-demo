@@ -1,0 +1,72 @@
+git clone -b 3.34.0 ssh://git@git.iter.org/imas/data-dictionary.git
+git clone -b 4.9.3 ssh://git@git.iter.org/imas/access-layer.git
+
+wget https://downloads.sourceforge.net/project/saxon/Saxon-HE/9.9/SaxonHE9-9-0-2J.zip
+unzip SaxonHE9-9-0-2J.zip -d saxon
+export CLASSPATH=$PWD/saxon/saxon9he.jar
+
+module load anaconda3/2021.5
+module load intel/2021.1.2
+module load hdf5/intel-2021.1/1.10.6
+
+export IMAS_INSTALL_DIR=$HOME/IMAS_3.34
+
+cd data-dictionary
+make
+make install
+
+cd ../access-layer
+ln -s ../data-dictionary xml
+make IMAS_MDSPLUS=no IMAS_UDA=no IMAS_JAVA=no IMAS_MATLAB=no IMAS_MEX=no IMAS_CPP=no IMAS_IFORT=yes -j8
+make IMAS_MDSPLUS=no IMAS_UDA=no IMAS_JAVA=no IMAS_MATLAB=no IMAS_MEX=no IMAS_CPP=no IMAS_IFORT=yes install
+
+# To use IMAS
+export IMAS_PREFIX=$HOME/IMAS_3.34
+export LD_LIBRARY_PATH=$IMAS_PREFIX/lib:$LD_LIBRARY_PATH
+export IMAS_VERSION=3.34.0
+export PYTHONPATH=$IMAS_PREFIX/python/lib
+
+gfortran -I${IMAS_PREFIX}/include/gfortran -o imas_gfortran imas.f90 -L${IMAS_PREFIX}/lib -limas-gfortran
+ifort -I${IMAS_PREFIX}/include/ifort -o imas_ifort imas.f90 -L${IMAS_PREFIX}/lib -limas-ifort
+
+
+###### With MDSPLUS
+
+git clone -b 3.34.0 ssh://git@git.iter.org/imas/data-dictionary.git
+git clone -b 4.9.3 ssh://git@git.iter.org/imas/access-layer.git
+
+wget https://downloads.sourceforge.net/project/saxon/Saxon-HE/9.9/SaxonHE9-9-0-2J.zip
+unzip SaxonHE9-9-0-2J.zip -d saxon
+export CLASSPATH=$PWD/saxon/saxon9he.jar
+
+module load anaconda3/2021.5
+module load intel/2021.1.2
+module load hdf5/intel-2021.1/1.10.6
+
+export IMAS_INSTALL_DIR=$HOME/IMAS_MDSPLUS_3.34
+
+git clone -b stable_release-7-96-12 --depth 1 https://github.com/MDSplus/mdsplus.git
+
+cd mdsplus
+./bootstrap
+mkdir build
+cd build
+../configure --prefix=$IMAS_INSTALL_DIR
+make
+make install
+cd ../..
+
+export MDSPLUS_DIR=$IMAS_INSTALL_DIR
+export LD_LIBRARY_PATH=$MDSPLUS_DIR/lib:$LD_LIBRARY_PATH
+
+export CLASSPATH=$CLASSPATH:$IMAS_INSTALL_DIR/java/classes/jTraverser.jar
+
+
+cd data-dictionary
+make
+make install
+
+cd ../access-layer
+ln -s ../data-dictionary xml
+make IMAS_UDA=no IMAS_JAVA=no IMAS_MATLAB=no IMAS_MEX=no IMAS_CPP=no IMAS_IFORT=yes -j8
+make IMAS_UDA=no IMAS_JAVA=no IMAS_MATLAB=no IMAS_MEX=no IMAS_CPP=no IMAS_IFORT=yes install
